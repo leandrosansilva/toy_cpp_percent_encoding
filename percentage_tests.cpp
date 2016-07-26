@@ -37,6 +37,10 @@ go_bandit([]{
       AssertThat(percentage_decode("Is+this+Chinese+char\%3A+\%F0\%9F\%88\%9A\%EF\%B8\%8E+Chinese%3F+I+don%27t+know%E2%80%A6"), Equals("Is this Chinese char: 🈚︎ Chinese? I don't know…"));
     });
 
+    it("decodes '2+%2B+2+%3D+5' to '2 + 2 = 5'", [&] {
+      AssertThat(percentage_decode("2+%2B+2+%3D+5"), Equals("2 + 2 = 5"));
+    });
+
   });
 });
 

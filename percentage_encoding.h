@@ -2,9 +2,6 @@
 
 #include <string>
 #include <numeric>
-#include <vector>
-#include <tuple>
-#include <iostream>
 #include <functional>
 #include <array>
 
@@ -22,7 +19,7 @@ constexpr auto is_printable(char c) -> bool
           || (c >= 'A' && c <= 'Z');
 }
 
-constexpr auto has_hexa_base(char c) -> bool
+constexpr auto is_base16(char c) -> bool
 {
   return (c >= 'a' && c <= 'f')
           || (c >= 'A' && c <= 'F')
@@ -55,7 +52,7 @@ const auto decoder_state_handlers = std::array<std::function<decoder_context(con
   // S1
   [](const decoder_context& context, char c) -> decoder_context
   {
-    if (!has_hexa_base(c))
+    if (!is_base16(c))
       throw std::runtime_error("Invalid state on S1");
 
     return {decoder_state::S2, context.acc, c};
@@ -64,7 +61,7 @@ const auto decoder_state_handlers = std::array<std::function<decoder_context(con
   // S2
   [](const decoder_context& context, char c) -> decoder_context
   {
-    if (!has_hexa_base(c))
+    if (!is_base16(c))
       throw std::runtime_error("Invalid state on S2");
 
     const auto encoded_value = {context.hex_comp, c, '\0'};
