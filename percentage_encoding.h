@@ -16,7 +16,11 @@ constexpr auto is_printable(char c) -> bool
 {
   return (c >= '0' && c <= '9')
           || (c >= 'a' && c <= 'z')
-          || (c >= 'A' && c <= 'Z');
+          || (c >= 'A' && c <= 'Z')
+          || c == '.'
+          || c == '-'
+          || c == '_'
+          || c == '~';
 }
 
 constexpr auto is_base16(char c) -> bool
@@ -46,7 +50,7 @@ const auto decoder_state_handlers = std::array<std::function<decoder_context(con
     if (c == '%')
       return {decoder_state::S1, context.acc, '\0'};
 
-    throw std::runtime_error(std::string{"Invalid input"});
+    throw std::runtime_error(std::string{"Invalid input on S0: "} + c);
   },
 
   // S1
@@ -74,11 +78,16 @@ const auto decoder_state_handlers = std::array<std::function<decoder_context(con
 
 auto percentage_decode(const std::string &input) -> std::string
 {
-  return std::accumulate(
+  const auto context = std::accumulate(
     begin(input),
     end(input),
-    decoder_context{decoder_state::S0, std::string{}, char{0}},
+    decoder_context{decoder_state::S0, std::string{}, '\0'},
     [&](const decoder_context &context, char c) -> decoder_context {
       return decoder_state_handlers[static_cast<std::size_t>(context.state)](context, c);
-    }).acc;
+    });
+
+  if (context.state != decoder_state::S0)
+    throw std::runtime_error("Invalid input");
+
+  return context.acc;
 }
